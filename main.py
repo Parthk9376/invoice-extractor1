@@ -51,10 +51,25 @@ def extract(data: InvoiceInput):
     }
 
     # Invoice Number
-    invoice_patterns = [
-        r"Invoice\s*(?:No|Number)?[:#]?\s*([A-Za-z0-9\-\/]+)",
-        r"INV[- ]?\d[\w\-]*",
+    invoice_no = None
+
+    patterns = [
+    r"Invoice\s*(?:No|Number)?\s*[:#-]?\s*([A-Za-z0-9-]+)",
+    r"Inv\s*(?:No|Number)?\s*[:#-]?\s*([A-Za-z0-9-]+)",
+    r"\b([A-Z]{2,5}-\d{2,})\b"
     ]
+
+for pat in patterns:
+    m = re.search(pat, text, re.IGNORECASE)
+    if m:
+        candidate = m.group(1)
+
+        # Skip words that are not invoice numbers
+        if candidate.lower() not in ["invoice", "number", "no", "inv"]:
+            invoice_no = candidate
+            break
+
+result["invoice_no"] = invoice_no
 
     for p in invoice_patterns:
         m = re.search(p, text, re.IGNORECASE)
